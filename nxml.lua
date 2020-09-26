@@ -300,7 +300,7 @@ function PARSER_FUNCS:parse_element(skip_opening_tag)
     end
 
     local elem_name = tok.value
-    local elem = setmetatable({ name = elem_name, attr = {}, children = {} }, XML_ELEMENT_MT)
+    local elem = nxml.new_element(elem_name)
 
     local self_closing = false
 
@@ -351,7 +351,11 @@ function PARSER_FUNCS:parse_element(skip_opening_tag)
                 table.insert(elem.children, child)
             end
         else
-            elem._text = elem._text and elem._text .. " " .. tok.value or tok.value
+            if elem.text == "" then
+                elem.text = tok.value
+            else
+                elem.text = elem.text .. " " .. (tok.value or "")
+            end
         end
     end
 end
@@ -427,6 +431,7 @@ end
 
 function nxml.new_element(name, attrs)
     return setmetatable({
+        text = "",
         name = name,
         attr = attrs or {},
         children = {}
@@ -460,9 +465,9 @@ function nxml.tostring(elem, packed, indent_char, cur_indent)
 
     local deeper_indent = cur_indent .. indent_char
 
-    if elem._text then
+    if elem.text then
         if not packed then s = s .. "\n" .. deeper_indent end
-        s = s .. elem._text
+        s = s .. elem.text
     end
 
     if not packed then s = s .. "\n" end
