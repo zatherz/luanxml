@@ -364,6 +364,23 @@ function XML_ELEMENT_FUNCS:add_child(child)
     self.children[#self.children + 1] = child
 end
 
+function XML_ELEMENT_FUNCS:remove_child(child)
+    for i = 1, #self.children do
+        if self.children[i] == child then
+            table.remove(self.children, i)
+            break
+        end
+    end
+end
+
+function XML_ELEMENT_FUNCS:clear_children()
+    self.children = {}
+end
+
+function XML_ELEMENT_FUNCS:clear_attrs()
+    self.attr = {}
+end
+
 function XML_ELEMENT_FUNCS:first_of(element_name)
     local i = 0
     local n = #self.children
@@ -465,7 +482,7 @@ function nxml.tostring(elem, packed, indent_char, cur_indent)
 
     local deeper_indent = cur_indent .. indent_char
 
-    if elem.text then
+    if elem.text and elem.text ~= "" then
         if not packed then s = s .. "\n" .. deeper_indent end
         s = s .. elem.text
     end
@@ -475,10 +492,10 @@ function nxml.tostring(elem, packed, indent_char, cur_indent)
     for i, v in ipairs(elem.children) do
         if not packed then s = s .. deeper_indent end
         s = s .. nxml.tostring(v, packed, indent_char, deeper_indent)
-        if not packed then s = s .. "\n" .. cur_indent end
+        if not packed then s = s .. "\n" end
     end
 
-    s = s .. "</" .. elem.name .. ">"
+    s = s .. cur_indent .. "</" .. elem.name .. ">"
 
     return s
 end
