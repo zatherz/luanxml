@@ -373,6 +373,10 @@ function XML_ELEMENT_FUNCS:remove_child(child)
     end
 end
 
+function XML_ELEMENT_FUNCS:remove_child_at(index)
+    table.remove(self.children, index)
+end
+
 function XML_ELEMENT_FUNCS:clear_children()
     self.children = {}
 end

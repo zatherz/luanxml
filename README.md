@@ -86,6 +86,22 @@ LuaNXML's API is a bit more object oriented and abstract than something like xml
 
       adds a child element
 
+    * **function** `:remove_child(element : nxml.element)`
+
+      removes the passed element from this element's list of children
+
+    * **function** `:remove_child_at(index : number)`
+
+      removes the element at index `index` from this element's list of children
+
+    * **function** `:clear_children()`
+
+      removes all children of this element
+
+    * **function** `:clear_attrs()`
+
+      removes all attributes of this element
+
     * **metamethod** `__tostring`  
 
       using the Lua `tostring` function on an `nxml.element` will produce a valid Noita XML string  
