@@ -114,7 +114,7 @@ function TOKENIZER_FUNCS:move(n)
         return
     end
     for i = prev_idx, self.cur_idx - 1 do
-        if self.data[i] == string.byte("\n") then
+        if str_index(self.data, i) == string.byte("\n") then
             self.cur_row = self.cur_row + 1
             self.cur_col = 1
         else
@@ -128,7 +128,7 @@ function TOKENIZER_FUNCS:peek(n)
     local idx = self.cur_idx + n
     if idx >= self.len then return 0 end
 
-    return self.data[idx]
+    return str_index(self.data, idx)
 end
 
 function TOKENIZER_FUNCS:match_string(str)
