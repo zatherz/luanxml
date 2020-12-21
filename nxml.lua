@@ -259,9 +259,6 @@ local XML_ELEMENT_MT = {
     __tostring = function(self)
         return nxml.tostring(self)
     end,
-    __newindex = function(self, key, value)
-        error("attempted to add a new field '" .. tostring(key) .. "' to an NXML element - did you mean to set it on the .attr field? like: element.attr." .. tostring(key) .. " = ...")
-    end
 }
 
 function PARSER_FUNCS:report_error(type, msg)
@@ -301,6 +298,7 @@ function PARSER_FUNCS:parse_element(skip_opening_tag)
 
     local elem_name = tok.value
     local elem = nxml.new_element(elem_name)
+    local content_idx = 0
 
     local self_closing = false
 
@@ -351,13 +349,40 @@ function PARSER_FUNCS:parse_element(skip_opening_tag)
                 table.insert(elem.children, child)
             end
         else
-            if elem.text == "" then
-                elem.text = tok.value
-            else
-                elem.text = elem.text .. " " .. (tok.value or "")
+            if not elem.content then
+                elem.content = {}
             end
+            
+            content_idx = content_idx + 1
+            elem.content[content_idx] = tok.value or tok.type
         end
     end
+end
+
+local function is_punctuation(str)
+    return str == "/" or str == "<" or str == ">" or str == "="
+end
+
+function XML_ELEMENT_FUNCS:text()
+    local content_count = #self.content
+
+    if self.content == nil or content_count == 0 then
+        return ""
+    end
+
+    local text = self.content[1]
+    for i = 2, content_count do
+        local elem = self.content[i]
+        local prev = self.content[i - 1]
+
+        if is_punctuation(elem) or is_punctuation(prev) then
+            text = text .. elem
+        else
+            text = text .. " " .. elem
+        end
+    end
+
+    return text
 end
 
 function XML_ELEMENT_FUNCS:add_child(child)
@@ -452,10 +477,10 @@ end
 
 function nxml.new_element(name, attrs)
     return setmetatable({
-        text = "",
         name = name,
         attr = attrs or {},
-        children = {}
+        children = {},
+        content = nil
     }, XML_ELEMENT_MT)
 end
 
@@ -471,7 +496,7 @@ function nxml.tostring(elem, packed, indent_char, cur_indent)
     indent_char = indent_char or "\t"
     cur_indent = cur_indent or ""
     local s = "<" .. elem.name
-    local self_closing = #elem.children == 0
+    local self_closing = #elem.children == 0 and (not elem.content or #elem.content == 0)
 
     for k, v in pairs(elem.attr) do
         s = s .. " " .. k .. "=\"" .. attr_value_to_str(v) .. "\""
@@ -486,9 +511,9 @@ function nxml.tostring(elem, packed, indent_char, cur_indent)
 
     local deeper_indent = cur_indent .. indent_char
 
-    if elem.text and elem.text ~= "" then
+    if elem.content and #elem.content ~= 0 then
         if not packed then s = s .. "\n" .. deeper_indent end
-        s = s .. elem.text
+        s = s .. elem:text()
     end
 
     if not packed then s = s .. "\n" end

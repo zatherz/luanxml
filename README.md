@@ -64,6 +64,21 @@ LuaNXML's API is a bit more object oriented and abstract than something like xml
       `nxml.parse` will always return elements where all the values inside `.attr` are of type `string`, but it is perfectly fine to assign values of different types like numbers or booleans  
       booleans will be converted to `"1"` or `"0"` when generating the XML string with `nxml.string`/`tostring` - all other types are simply ran through `tostring` to produce the serialized value
 
+    * **field** `.content` **of type** `table{string}`
+
+      contains a list of content tokens within the element  
+      as is the case in Noita, text content inside elements is parsed on a token-by-token basis, and this table contains the list of those tokens  
+      may be `nil` or contain 0 elements, in both cases that means the text element has no content  
+      example: `<foo>foo/bar</foo>` and `<foo> foo / bar </foo>` will both result in this field containing the strings `foo`, `/` and `bar`  
+      see: `:text()`
+
+    * **function** `:text()` **returns** `string`
+
+      returns the text content of this element as a single string  
+      text that is not punctuation (i.e. is not `<`, `>`, `/` and `=`) is joined with a single space, punctuation is joined without any separators  
+      example: `<foo> foo   bar </foo>` will result in `foo bar`, while `<foo>foo/bar/baz</foo>` will result in `foo/bar/baz`  
+      see: `.content`
+
     * **iterator** `:each_child()` **yields** `nxml.element`
 
       iterates every child element  
@@ -106,6 +121,8 @@ LuaNXML's API is a bit more object oriented and abstract than something like xml
 
       using the Lua `tostring` function on an `nxml.element` will produce a valid Noita XML string  
       see: `nxml.tostring`
+
+      
 
 ## LuaJIT FFI
 
