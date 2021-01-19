@@ -34,9 +34,32 @@ LuaNXML's API is a bit more object oriented and abstract than something like xml
 * **table** `nxml`
     * **function** `.parse(data : string)` **returns** `nxml.element`
 
-      parses `data` into an `nxml.element` type table
+      parses `data` into an `nxml.element` type table  
+      `data` must be a single element (which may have children), like:  
+      ```xml
+      <foo />
+      ```
+      or
+      ```xml
+      <foo>
+        <bar>
+          <baz/>
+        </bar>
+      </foo>
+      ```
 
-    * **function** `.tostring(elem : nxml.element, [packed : boolean, [indent_char : string, [cur_indent : string]]])` ** returns** `string`
+    * **function** `.parse_many(data : string)` **returns** `table[nxml.element]`
+
+      parses `data` into a a table of `nxml.element`s  
+      the difference between `.parse_many` and `.parse` is that `.parse_many` can read multiple elements written one after another, like this:  
+      ```xml
+      <foo />
+      <bar />
+      <baz />
+      ```  
+      and it will spit out a table of all root elements
+
+    * **function** `.tostring(elem : nxml.element, [packed : boolean, [indent_char : string, [cur_indent : string]]])` **returns** `string`
 
       serializes the `nxml.element` object into a valid Noita XML string that can be read by the game  
       if `packed` is set to `true`, the string is compressed into a single line - otherwise, line breaks and indents are used  
@@ -100,6 +123,10 @@ LuaNXML's API is a bit more object oriented and abstract than something like xml
     * **function** `:add_child(element : nxml.element)`
 
       adds a child element
+
+    * **function** `:add_children(elements : table[nxml.element])`
+
+      adds all elements from the table as children
 
     * **function** `:remove_child(element : nxml.element)`
 
