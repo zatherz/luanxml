@@ -359,6 +359,21 @@ function PARSER_FUNCS:parse_element(skip_opening_tag)
     end
 end
 
+function PARSER_FUNCS:parse_elements()
+    local tok = self.tok:next_token()
+    local elems = {}
+    local elems_i = 1
+
+    while tok and tok.type == "<" do
+        elems[elems_i] = self:parse_element(true)
+        elems_i = elems_i + 1
+
+        tok = self.tok:next_token()
+    end
+
+    return elems
+end
+
 local function is_punctuation(str)
     return str == "/" or str == "<" or str == ">" or str == "="
 end
@@ -387,6 +402,14 @@ end
 
 function XML_ELEMENT_FUNCS:add_child(child)
     self.children[#self.children + 1] = child
+end
+
+function XML_ELEMENT_FUNCS:add_children(children)
+    local children_i = #self.children + 1
+    for i = 1, #children do
+        self.children[children_i] = children[i]
+        children_i = children_i + 1
+    end
 end
 
 function XML_ELEMENT_FUNCS:remove_child(child)
@@ -470,9 +493,25 @@ function nxml.parse(data)
         error("parser encountered errors")
     end
 
-    rawset(elem, "_srcbuf", data)
-
     return elem
+end
+
+function nxml.parse_many(data)
+    local data_len = #data
+    local tok = new_tokenizer(str_normalize(data), data_len)
+    local parser = new_parser(tok)
+    
+    local elems = parser:parse_elements(false)
+    
+    for i = 1, #elems do
+        local elem = elems[i]
+
+        if elem.errors and #elem.errors > 0 then
+            error("parser encountered errors")
+        end
+    end
+
+    return elems
 end
 
 function nxml.new_element(name, attrs)
