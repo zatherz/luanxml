@@ -452,7 +452,7 @@ function XML_ELEMENT_FUNCS:each_of(element_name)
     local n = #self.children
 
     return function()
-        while i <= n and not self.children[i].name == element_name do
+        while i <= n and self.children[i].name ~= element_name do
             i = i + 1
         end
         i = i + 1
