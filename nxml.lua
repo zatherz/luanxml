@@ -482,6 +482,10 @@ function XML_ELEMENT_FUNCS:each_child()
     end
 end
 
+function XML_ELEMENT_FUNCS:set_attr(name, value)
+    self.attr[name] = value
+end
+
 function nxml.parse(data)
     local data_len = #data
     local tok = new_tokenizer(str_normalize(data), data_len)
